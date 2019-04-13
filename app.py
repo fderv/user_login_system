@@ -6,31 +6,21 @@ import bcrypt
 mysql = MySQL()
 
 app = Flask(__name__)
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = '724672'
-app.config['MYSQL_DATABASE_DB'] = 'user_info'
-app.config['MYSQL_DATABASE_CURSORCLASS'] = 'DictCursor'
+app.secret_key = 'abc123'
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config["SESSION_PERMANENT"] = False
+
+app.config['MYSQL_DATABASE_HOST'] = 'd3rv.mysql.pythonanywhere-services.com'
+app.config['MYSQL_DATABASE_USER'] = 'd3rv'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'abc12312'
+app.config['MYSQL_DATABASE_DB'] = 'd3rv$user_info'
 mysql.init_app(app)
 
 conn = mysql.connect()
 cur = conn.cursor()
 
-@app.route('/mainpage.html', methods=["GET", "POST"])
-def home():
-    if request.method == 'POST':
-        pass_o = request.form['passwordo']
-        pass_n = request.form['passwordn']
-        if bcrypt.hashpw(pass_o.encode('utf-8'), session['hashpass'].encode('utf-8')) == session['hashpass'].encode('utf-8') and pass_n != "":
-            values = (bcrypt.hashpw(pass_n.encode('utf-8'), session['hashpass'].encode('utf-8')), session['hashpass'].encode('utf-8'))
-            cur.execute("UPDATE user_table SET password = %s WHERE password= %s;", values)
-            conn.commit()
-            return redirect(url_for("main"))
-
-        else:
-            return render_template("mainpage.html")
-    else:
-        return render_template("mainpage.html")
+if __name__ == '__main__':
+    app.run(debug=True)
 
 @app.route('/', methods=["GET", "POST"])
 def main():
@@ -43,13 +33,12 @@ def main():
         user = cur.fetchone()
 
         if userCount != 0:
-            if bcrypt.hashpw(password, user[1].encode('utf-8')) == user[1].encode('utf-8'):
+            if bcrypt.hashpw(password, user[1].encode('utf-8')) == user[1]:
                 session['username'] = user[0]
                 session['email'] = user[2]
                 session['phone'] = user[3]
                 session['city'] = user[4]
-                session['hashpass'] = user[1]
-                return redirect(url_for("home"))
+                return render_template("mainpage.html")
             else:
                 return render_template("index.html", error="Incorrect password")
         else:
@@ -78,7 +67,7 @@ def signup():
         cur.execute("SELECT COUNT(username) FROM user_table WHERE email='"+email+"'")
         countOfEmail = cur.fetchone()[0]
         if countOfUsername > 0 or countOfEmail > 0 or username=="" or email== "":
-            return render_template("signup.html", error=str(countOfEmail)+" "+str(countOfUsername))
+            return render_template("signup.html", error="Error")
         else:
             password = request.form['password'].encode('utf-8')
             hash_password = bcrypt.hashpw(password, bcrypt.gensalt())
@@ -89,8 +78,6 @@ def signup():
             data = (username, hash_password, email, phone, city)
             cur.execute(insert, data)
             conn.commit()
+            session['username'] = username
+            session['email'] = email
             return redirect(url_for("main"))
-
-if __name__ == '__main__':
-    app.secret_key = "ABC123"
-    app.run(debug=True)
