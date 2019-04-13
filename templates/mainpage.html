@@ -1,1 +1,55 @@
-main test
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Welcome {{ session['username'] }}</title>
+
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link href= "{{ url_for('static',filename='css/style.css') }}" rel="stylesheet" type="text/css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+
+</head>
+
+<body>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">Username</th>
+        <th scope="col">E-Mail</th>
+        <th scope="col">Phone Number</th>
+        <th scope="col">City</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ session['username'] }}</td>
+        <td>{{ session['email'] }}</td>
+        <td>{{ session['phone'] }}</td>
+        <td>{{ session['city'] }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+    <div class="wrapper fadeInDown">
+      <div id="formContent">
+        <!-- Tabs Titles -->
+        <div>
+          {{ error }}
+        </div>
+        <!-- Login Form -->
+        <form method="POST">
+          <input type="password" id="password_o" class="fadeIn second" name="passwordo" placeholder="current password">
+          <input type="password" id="password_n" class="fadeIn second" name="passwordn" placeholder="new password">
+          <input type="submit" class="fadeIn fourth" value="Change Password">
+        </form>
+
+      </div>
+    </div>
+</body>
+
+
+
+</html>

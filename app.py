@@ -16,6 +16,22 @@ mysql.init_app(app)
 conn = mysql.connect()
 cur = conn.cursor()
 
+@app.route('/mainpage.html', methods=["GET", "POST"])
+def home():
+    if request.method == 'POST':
+        pass_o = request.form['passwordo']
+        pass_n = request.form['passwordn']
+        if bcrypt.hashpw(pass_o.encode('utf-8'), session['hashpass'].encode('utf-8')) == session['hashpass'].encode('utf-8') and pass_n != "":
+            values = (bcrypt.hashpw(pass_n.encode('utf-8'), session['hashpass'].encode('utf-8')), session['hashpass'].encode('utf-8'))
+            cur.execute("UPDATE user_table SET password = %s WHERE password= %s;", values)
+            conn.commit()
+            return redirect(url_for("main"))
+
+        else:
+            return render_template("mainpage.html")
+    else:
+        return render_template("mainpage.html")
+
 @app.route('/', methods=["GET", "POST"])
 def main():
     if request.method == 'POST':
@@ -28,11 +44,12 @@ def main():
 
         if userCount != 0:
             if bcrypt.hashpw(password, user[1].encode('utf-8')) == user[1].encode('utf-8'):
-                session['username'] = user[1]
-                session['email'] = user[1]
-                session['phone'] = user[]
-                session['city'] = user[]
-                return render_template("mainpage.html")
+                session['username'] = user[0]
+                session['email'] = user[2]
+                session['phone'] = user[3]
+                session['city'] = user[4]
+                session['hashpass'] = user[1]
+                return redirect(url_for("home"))
             else:
                 return render_template("index.html", error="Incorrect password")
         else:
@@ -72,8 +89,6 @@ def signup():
             data = (username, hash_password, email, phone, city)
             cur.execute(insert, data)
             conn.commit()
-            session['username'] = username
-            session['email'] = email
             return redirect(url_for("main"))
 
 if __name__ == '__main__':
