@@ -17,13 +17,30 @@ app.config['MYSQL_DATABASE_DB'] = 'd3rv$user_info'
 mysql.init_app(app)
 
 conn = mysql.connect()
-cur = conn.cursor()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
 
+@app.route('/mainpage.html', methods=["GET", "POST"])
+def home():
+    cur = conn.cursor()
+    if request.method == 'POST':
+        pass_o = request.form['passwordo']
+        pass_n = request.form['passwordn']
+        if bcrypt.hashpw(pass_o.encode('utf-8'), session['hashpass']) == session['hashpass'] and pass_n != "":
+            values = (bcrypt.hashpw(pass_n.encode('utf-8'), session['hashpass'].encode('utf-8')), session['hashpass'].encode('utf-8'))
+            cur.execute("UPDATE user_table SET password = %s WHERE password= %s;", values)
+            conn.commit()
+            return redirect(url_for("main"))
+        else:
+            return render_template("mainpage.html")
+    else:
+        return render_template("mainpage.html")
+
 @app.route('/', methods=["GET", "POST"])
 def main():
+    cur = conn.cursor()
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password'].encode('utf-8')
@@ -38,7 +55,8 @@ def main():
                 session['email'] = user[2]
                 session['phone'] = user[3]
                 session['city'] = user[4]
-                return render_template("mainpage.html")
+                session['hashpass'] = user[1]
+                return redirect(url_for('home'))
             else:
                 return render_template("index.html", error="Incorrect password")
         else:
@@ -52,6 +70,7 @@ def main():
 
 @app.route('/signup', methods=["GET","POST"])
 def signup():
+    cur = conn.cursor()
     if request.method == 'GET':
         return render_template("signup.html", error="")
     else:
