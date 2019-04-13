@@ -61,7 +61,7 @@ def signup():
         phone = request.form['phone']
         city = request.form['city']
 
-        cur.execute("SELECT COUNT(username) FROM user_table WHERE username='"+username+"'")
+        cur.execute("SELECT COUNT(username) FROM user_table WHERE username=%s", username)
         countOfUsername = cur.fetchone()[0]
 
         cur.execute("SELECT COUNT(username) FROM user_table WHERE email='"+email+"'")
