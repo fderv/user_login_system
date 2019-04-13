@@ -1,15 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flaskext.mysql import MySQL
+
 import bcrypt
 
 mysql = MySQL()
+
 app = Flask(__name__)
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = '724672'
 app.config['MYSQL_DATABASE_DB'] = 'user_info'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config['MYSQL_DATABASE_CURSORCLASS'] = 'DictCursor'
 mysql.init_app(app)
+
+conn = mysql.connect()
+cur = conn.cursor()
 
 @app.route('/', methods=["GET", "POST"])
 def main():
@@ -17,20 +22,21 @@ def main():
         username = request.form['username']
         password = request.form['password'].encode('utf-8')
 
-        cur = mysql.get_db().cursor(MySQLdb.cursors.DictCursor)
-        cur.execute("SELECT * FROM user_table WHERE username=%s", (username))
+        cur.execute("SELECT * FROM user_table WHERE username=%s",username)
+        userCount = cur.rowcount
         user = cur.fetchone()
-        cur.close()
 
-        if len(user) > 0:
-            if bcrypt.hashpw(password, user["password"].encode('utf-8')) == user["password"]:
-                session['username'] = user['username']
-                session['email'] = user['email']
-                return render_template("home.html")
+        if userCount != 0:
+            if bcrypt.hashpw(password, user[1].encode('utf-8')) == user[1].encode('utf-8'):
+                session['username'] = user[1]
+                session['email'] = user[1]
+                session['phone'] = user[]
+                session['city'] = user[]
+                return render_template("mainpage.html")
             else:
                 return render_template("index.html", error="Incorrect password")
         else:
-            return render_template("index.html", error="Incorrect username")
+            return render_template("index.html", error="Incorrect username or password")
 
     else:
         return render_template('index.html')
@@ -44,7 +50,6 @@ def signup():
         return render_template("signup.html", error="")
     else:
 
-        cur = mysql.get_db().cursor()
         username = request.form['username']
         email = request.form['email']
         phone = request.form['phone']
@@ -66,7 +71,7 @@ def signup():
                      "VALUES (%s, %s, %s, %s, %s)"
             data = (username, hash_password, email, phone, city)
             cur.execute(insert, data)
-            mysql.get_db().commit()
+            conn.commit()
             session['username'] = username
             session['email'] = email
             return redirect(url_for("main"))
