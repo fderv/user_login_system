@@ -10,10 +10,10 @@ app.secret_key = 'abc123'
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config["SESSION_PERMANENT"] = False
 
-app.config['MYSQL_DATABASE_HOST'] = 'd3rv.mysql.pythonanywhere-services.com'
-app.config['MYSQL_DATABASE_USER'] = 'd3rv'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'abc12312'
-app.config['MYSQL_DATABASE_DB'] = 'd3rv$user_info'
+app.config['MYSQL_DATABASE_HOST'] = 'WILL_BE_REPLACED'
+app.config['MYSQL_DATABASE_USER'] = 'WILL_BE_REPLACED'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'WILL_BE_REPLACED'
+app.config['MYSQL_DATABASE_DB'] = 'WILL_BE_REPLACED'
 mysql.init_app(app)
 
 conn = mysql.connect()
